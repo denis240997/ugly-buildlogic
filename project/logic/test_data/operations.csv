@@ -1,0 +1,16 @@
+op_id,duration,priority,release_time,predecessors,successors,resources,deadline
+TASK1/_/1,1,1,0,set(),{'TASK1/_/2'},['RES1'],0
+TASK1/_/2,1,1,0,{'TASK1/_/1'},"{'TASK1/_/3', 'TASK2/_/4'}",['RES1'],0
+TASK1/_/3,1,1,0,{'TASK1/_/2'},{'TASK1/_/5'},['RES1'],0
+TASK2/_/4,1,2,0,{'TASK1/_/2'},{'TASK2/_/6'},['RES2'],0
+TASK1/_/5,1,1,0,{'TASK1/_/3'},set(),['RES2'],0
+TASK2/_/6,1,2,0,{'TASK2/_/4'},{'TASK3/_/8'},['RES1'],0
+TASK3/_/7,1,3,0,set(),{'TASK3/_/8'},['RES2'],0
+TASK3/_/8,1,3,0,"{'TASK2/_/6','TASK3/_/7'}",{'TASK3/_/9'},['RES1'],0
+TASK3/_/9,1,3,0,{'TASK3/_/8'},set(),"['RES1','RES2']",0
+TASK4/_/10,1,4,0,set(),{'TASK4/_/11'},"['RES1','RES1']",0
+TASK4/_/11,1,4,0,{'TASK4/_/10'},{'TASK4/_/12'},['RES2'],0
+TASK4/_/12,1,4,0,{'TASK4/_/11'},{'TASK4/_/13'},['RES2'],0
+TASK4/_/13,1,4,0,{'TASK4/_/12'},{'TASK4/_/14'},['RES1'],0
+TASK4/_/14,1,4,0,{'TASK4/_/13'},{'TASK4/_/15'},['RES1'],0
+TASK4/_/15,2,4,0,{'TASK4/_/14'},set(),['RES1'],0

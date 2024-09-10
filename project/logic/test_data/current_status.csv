@@ -1,0 +1,16 @@
+op_id,fact_start,fact_finish,is_done
+TASK1/_/1,0,1,True
+TASK1/_/2,3,4,True
+TASK1/_/3,4,5,True
+TASK2/_/4,None,None,False
+TASK1/_/5,None,None,False
+TASK2/_/6,None,None,False
+TASK3/_/7,0,1,True
+TASK3/_/8,None,None,False
+TASK3/_/9,None,None,False
+TASK4/_/10,1,2,True
+TASK4/_/11,2,3,True
+TASK4/_/12,None,None,False
+TASK4/_/13,None,None,False
+TASK4/_/14,None,None,False
+TASK4/_/15,None,None,False

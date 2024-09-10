@@ -1,0 +1,15 @@
+asyncpg
+fastapi
+gunicorn
+passlib[bcrypt]
+Pillow
+pydantic[email]
+pydantic-settings
+python-jose[cryptography]
+python-multipart
+tortoise-orm
+uvicorn[standard]
+kiwisolver==1.4.7
+matplotlib==3.9.2
+pandas==2.2.2
+psycopg2-binary==2.9.9

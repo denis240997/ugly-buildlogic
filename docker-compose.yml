@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Zgg1KzYGcdZQg8
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # ports:
+    #   - "5432:5432"
+
+  app:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+    volumes:
+      - ./project:/usr/src/app
+    container_name: fastapi_app
+    environment:
+      - DATABASE_URL=postgresql://postgres:Zgg1KzYGcdZQg8@db:5432/postgres
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+
+volumes:
+  postgres_data:
+    driver: local
