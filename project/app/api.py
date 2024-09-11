@@ -14,8 +14,11 @@ from app.loader import (
     compute_rcpm,
     compute_ssgs,
     compute_rcpm_with_local_sgs,
+    get_completion_percentage,
+    get_gantt_chart,
 )
 from logic.src.database import NotEmptyDBError, IncompatibleColumnsError
+
 
 log = logging.getLogger("uvicorn")
 
@@ -37,7 +40,7 @@ async def create_project():
         log.error(f"Error while creating tables: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -50,7 +53,7 @@ async def delete_project():
         log.error(f"Error while deleting tables: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -72,7 +75,7 @@ async def upload_table(file: UploadFile, table_name: UploadableTable):
         log.error(f"Error while uploading the table {table_name}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -85,7 +88,7 @@ async def export_table_to_csv(table_name: Table):
         log.error(f"Error while exporting the table {table_name}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -98,7 +101,7 @@ async def delete_table(table_name: Table):
         log.error(f"Error while deleting the table {table_name}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -114,7 +117,7 @@ async def calculate_cpm():
         log.error(f"Error while calculating CPM: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -127,7 +130,7 @@ async def calculate_rcpm():
         log.error(f"Error while calculating RCPM: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -140,7 +143,7 @@ async def calculate_ssgs():
         log.error(f"Error while calculating SSGS: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -153,7 +156,7 @@ async def calculate_rcpm_with_local_sgs(selected_tasks: list[str], use_pr: bool)
         log.error(f"Error while calculating RCPM with local SGS: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
         )
 
 
@@ -166,5 +169,32 @@ async def export_results():
         log.error(f"Error while exporting the results: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=f"Internal Server Error: {e}",
+        )
+
+
+analytics_router = APIRouter()
+
+
+@analytics_router.get("/completion-percentage/", status_code=status.HTTP_200_OK)
+async def completion_percentage():
+    try:
+        return {"completion_percentage": get_completion_percentage()}
+    except Exception as e:
+        log.error(f"Error while calculating completion percentage: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal Server Error: {e}",
+        )
+
+
+@analytics_router.get("gantt-chart/", status_code=status.HTTP_200_OK)
+async def gantt_chart():
+    try:
+        return {"download_link": get_gantt_chart()}
+    except Exception as e:
+        log.error(f"Error while generating the Gantt chart: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal Server Error: {e}",
         )

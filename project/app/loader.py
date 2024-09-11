@@ -24,6 +24,10 @@ from logic.src.algorithms import (
     check_precedence_relations,
     local_ssgs,
 )
+from logic.src.analytics import (
+    calculate_completion_percentage,
+)
+from logic.src.plot import plot_gantt_chart
 
 
 @contextmanager
@@ -166,3 +170,17 @@ def compute_rcpm_with_local_sgs(
 
         insert_results_to_table(conn.cursor(), operations)
     return critical_path, total_duration
+
+
+def get_completion_percentage() -> float:
+    with db_connection() as conn:
+        df_current_status = pd.read_sql("SELECT * FROM current_status", conn)
+        return calculate_completion_percentage(df_current_status)
+
+
+def get_gantt_chart() -> str:
+    result_path = os.path.join(get_settings().static_dir, "gantt_chart.png")
+    with db_connection() as conn:
+        df_results = pd.read_sql("SELECT * FROM results", conn)
+        plot_gantt_chart(df_results, result_path)
+    return result_path
