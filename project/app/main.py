@@ -3,14 +3,15 @@ import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app import api
+from app.api import project_router, tables_router
 from app.config import get_settings
 
 log = logging.getLogger("uvicorn")
 
 def create_application() -> FastAPI:
     application = FastAPI(title="BuildLogic API", debug=True)
-    application.include_router(api.router)
+    application.include_router(project_router, prefix="/project", tags=["project"])
+    application.include_router(tables_router, prefix="/tables", tags=["tables"])
 
     application.mount("/static", StaticFiles(directory=get_settings().static_dir), name="static")
 
