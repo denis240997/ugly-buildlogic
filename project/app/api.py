@@ -10,6 +10,10 @@ from app.loader import (
     load_table_from_file,
     UploadableTable,
     export_table,
+    compute_cpm,
+    compute_rcpm,
+    compute_ssgs,
+    compute_rcpm_with_local_sgs,
 )
 from logic.src.database import NotEmptyDBError, IncompatibleColumnsError
 
@@ -92,6 +96,74 @@ async def delete_table(table_name: Table):
         return {"message": f"The table {table_name} has been deleted successfully."}
     except Exception as e:
         log.error(f"Error while deleting the table {table_name}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+planning_router = APIRouter()
+
+
+@planning_router.put("/cpm/", status_code=status.HTTP_200_OK)
+async def calculate_cpm():
+    try:
+        result, duration = compute_cpm()
+        return {"critical_path": result, "duration": duration}
+    except Exception as e:
+        log.error(f"Error while calculating CPM: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+@planning_router.put("/rcpm/", status_code=status.HTTP_200_OK)
+async def calculate_rcpm():
+    try:
+        result, duration = compute_rcpm()
+        return {"critical_path": result, "duration": duration}
+    except Exception as e:
+        log.error(f"Error while calculating RCPM: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+@planning_router.put("/ssgs/", status_code=status.HTTP_200_OK)
+async def calculate_ssgs():
+    try:
+        result, duration = compute_ssgs()
+        return {"critical_path": result, "duration": duration}
+    except Exception as e:
+        log.error(f"Error while calculating SSGS: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+@planning_router.put("/rcpm_with_local_sgs/", status_code=status.HTTP_200_OK)
+async def calculate_rcpm_with_local_sgs(selected_tasks: list[str], use_pr: bool):
+    try:
+        result, duration = compute_rcpm_with_local_sgs(selected_tasks, use_pr)
+        return {"critical_path": result, "duration": duration}
+    except Exception as e:
+        log.error(f"Error while calculating RCPM with local SGS: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+@planning_router.get("/export-results/", status_code=status.HTTP_200_OK)
+async def export_results():
+    try:
+        output_file = export_table(Table.results)
+        return {"download_link": output_file}
+    except Exception as e:
+        log.error(f"Error while exporting the results: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",

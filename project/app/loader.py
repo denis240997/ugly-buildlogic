@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from enum import Enum
 
 from fastapi import UploadFile
+import pandas as pd
 
 from app.config import get_settings
 from logic.src.database import (
@@ -12,6 +13,16 @@ from logic.src.database import (
     drop_table,
     insert_from_csv,
     export_table_to_csv,
+    insert_results_to_table,
+)
+from logic.src.algorithms import (
+    cpm,
+    rcpm,
+    ssgs,
+    prepare_operations,
+    check_resource_conflicts,
+    check_precedence_relations,
+    local_ssgs,
 )
 
 
@@ -99,3 +110,59 @@ def export_table(table_name: Table) -> str:
         export_table_to_csv(conn, table_name.value, result_path)
 
     return result_path
+
+
+def compute_cpm() -> tuple[list[str], int]:
+    with db_connection() as conn:
+        df_operations = pd.read_sql("SELECT * FROM operations", conn)
+        operations = prepare_operations(df_operations)
+        critical_path, total_duration = cpm(operations)
+        insert_results_to_table(conn.cursor(), operations)
+    return critical_path, total_duration
+
+
+def compute_rcpm() -> tuple[list[str], int]:
+    with db_connection() as conn:
+        df_operations = pd.read_sql("SELECT * FROM operations", conn)
+        df_resources = pd.read_sql("SELECT * FROM resources", conn)
+        operations = prepare_operations(df_operations)
+        critical_path, total_duration = rcpm(operations, df_resources)
+
+        check_resource_conflicts(operations, df_resources)  # Проверка конфликт ресурсов
+        check_precedence_relations(operations)  # Проверка конфликт предшествования
+
+        insert_results_to_table(conn.cursor(), operations)
+    return critical_path, total_duration
+
+
+def compute_ssgs() -> tuple[list[str], int]:
+    with db_connection() as conn:
+        df_operations = pd.read_sql("SELECT * FROM operations", conn)
+        df_resources = pd.read_sql("SELECT * FROM resources", conn)
+        operations = prepare_operations(df_operations)
+        critical_path, total_duration = ssgs(operations, df_resources)
+
+        check_resource_conflicts(operations, df_resources)
+        check_precedence_relations(operations)
+
+        insert_results_to_table(conn.cursor(), operations)
+    return critical_path, total_duration
+
+
+def compute_rcpm_with_local_sgs(
+    selected_tasks: list[str], use_pr: bool
+) -> tuple[list[str], int]:
+    with db_connection() as conn:
+        df_operations = pd.read_sql("SELECT * FROM operations", conn)
+        df_resources = pd.read_sql("SELECT * FROM resources", conn)
+        operations = prepare_operations(df_operations)
+        critical_path, _ = rcpm(operations, df_resources)
+        total_duration = local_ssgs(
+            operations, df_resources, selected_tasks, use_pr=use_pr
+        )
+
+        check_resource_conflicts(operations, df_resources)
+        check_precedence_relations(operations)
+
+        insert_results_to_table(conn.cursor(), operations)
+    return critical_path, total_duration
