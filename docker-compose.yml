@@ -19,7 +19,12 @@ services:
       - ./project:/usr/src/app
     container_name: fastapi_app
     environment:
-      - DATABASE_URL=postgresql://postgres:Zgg1KzYGcdZQg8@db:5432/postgres
+      # - DATABASE_URL=postgresql://postgres:Zgg1KzYGcdZQg8@db:5432/postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=Zgg1KzYGcdZQg8
+      - DB_NAME=postgres
     depends_on:
       - db
     ports:

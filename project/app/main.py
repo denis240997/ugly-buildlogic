@@ -9,8 +9,8 @@ from app.config import get_settings
 log = logging.getLogger("uvicorn")
 
 def create_application() -> FastAPI:
-    application = FastAPI(title="Equipment sharing service")
-    application.include_router(api.router, prefix="/login")
+    application = FastAPI(title="BuildLogic API", debug=True)
+    application.include_router(api.router)
 
     application.mount("/static", StaticFiles(directory=get_settings().static_dir), name="static")
 
