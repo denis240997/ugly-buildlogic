@@ -11,7 +11,7 @@ def calculate_completion_percentage(df_current_status) -> float:
     return completion_percentage
 
 
-def detect_project_delays(df_results, df_current_status) -> None:
+def detect_project_delays(df_results, df_current_status) -> str:
     df_merged = pd.merge(df_results, df_current_status, on="op_id", how="left")
 
     mismatches = df_merged[
@@ -24,10 +24,9 @@ def detect_project_delays(df_results, df_current_status) -> None:
 
     if not mismatches.empty:
         print("Mismatches found between planned and actual dates for completed tasks:")
-        print(
-            mismatches[
-                ["op_id", "early_start", "fact_start", "early_finish", "fact_finish"]
-            ]
-        )
-    else:
-        print("All actual dates for completed tasks match the planned dates.")
+        return mismatches[
+            ["op_id", "early_start", "fact_start", "early_finish", "fact_finish"]
+        ].to_json(orient="records", date_format="iso")
+    return {
+        "message": "No mismatches found between planned and actual dates for completed tasks."
+    }

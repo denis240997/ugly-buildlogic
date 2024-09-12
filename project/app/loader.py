@@ -26,6 +26,7 @@ from logic.src.algorithms import (
 )
 from logic.src.analytics import (
     calculate_completion_percentage,
+    detect_project_delays,
 )
 from logic.src.plot import plot_gantt_chart, plot_gantt_and_resource_chart
 
@@ -64,7 +65,10 @@ def init_project():
 
 def clear_static_dir():
     static_dir = get_settings().static_dir
+    # Delete all static files except for the .gitignore file
     for file in os.listdir(static_dir):
+        if file == ".gitignore":
+            continue
         os.remove(os.path.join(static_dir, file))
 
 
@@ -175,14 +179,14 @@ def compute_rcpm_with_local_sgs(
 def get_completion_percentage() -> float:
     with db_connection() as conn:
         df_current_status = pd.read_sql("SELECT * FROM current_status", conn)
-        return calculate_completion_percentage(df_current_status)
+    return calculate_completion_percentage(df_current_status)
 
 
 def get_gantt_chart() -> str:
     result_path = os.path.join(get_settings().static_dir, "gantt_chart.png")
     with db_connection() as conn:
         df_results = pd.read_sql("SELECT * FROM results", conn)
-        plot_gantt_chart(df_results, result_path)
+    plot_gantt_chart(df_results, result_path)
     return result_path
 
 
@@ -193,5 +197,12 @@ def get_gantt_with_resource_chart() -> str:
     with db_connection() as conn:
         df_results = pd.read_sql("SELECT * FROM results", conn)
         df_resources = pd.read_sql("SELECT * FROM resources", conn)
-        plot_gantt_and_resource_chart(df_results, df_resources, result_path)
+    plot_gantt_and_resource_chart(df_results, df_resources, result_path)
     return result_path
+
+
+def detect_delays() -> str:
+    with db_connection() as conn:
+        df_results = pd.read_sql("SELECT * FROM results", conn)
+        df_current_status = pd.read_sql("SELECT * FROM current_status", conn)
+    return detect_project_delays(df_results, df_current_status)

@@ -17,6 +17,7 @@ from app.loader import (
     get_completion_percentage,
     get_gantt_chart,
     get_gantt_with_resource_chart,
+    detect_delays,
 )
 from logic.src.database import NotEmptyDBError, IncompatibleColumnsError
 
@@ -207,6 +208,18 @@ async def gantt_chart_with_resources():
         return {"download_link": get_gantt_with_resource_chart()}
     except Exception as e:
         log.error(f"Error while generating the Gantt chart with resources: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal Server Error: {e}",
+        )
+
+
+@analytics_router.get("/detect-delays/", status_code=status.HTTP_200_OK)
+async def delays():
+    try:
+        return {"delays": detect_delays()}
+    except Exception as e:
+        log.error(f"Error while detecting delays: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal Server Error: {e}",
