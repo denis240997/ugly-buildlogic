@@ -27,7 +27,7 @@ from logic.src.algorithms import (
 from logic.src.analytics import (
     calculate_completion_percentage,
 )
-from logic.src.plot import plot_gantt_chart
+from logic.src.plot import plot_gantt_chart, plot_gantt_and_resource_chart
 
 
 @contextmanager
@@ -183,4 +183,15 @@ def get_gantt_chart() -> str:
     with db_connection() as conn:
         df_results = pd.read_sql("SELECT * FROM results", conn)
         plot_gantt_chart(df_results, result_path)
+    return result_path
+
+
+def get_gantt_with_resource_chart() -> str:
+    result_path = os.path.join(
+        get_settings().static_dir, "gantt_with_resource_chart.png"
+    )
+    with db_connection() as conn:
+        df_results = pd.read_sql("SELECT * FROM results", conn)
+        df_resources = pd.read_sql("SELECT * FROM resources", conn)
+        plot_gantt_and_resource_chart(df_results, df_resources, result_path)
     return result_path

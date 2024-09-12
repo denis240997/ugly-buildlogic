@@ -16,6 +16,7 @@ from app.loader import (
     compute_rcpm_with_local_sgs,
     get_completion_percentage,
     get_gantt_chart,
+    get_gantt_with_resource_chart,
 )
 from logic.src.database import NotEmptyDBError, IncompatibleColumnsError
 
@@ -188,12 +189,24 @@ async def completion_percentage():
         )
 
 
-@analytics_router.get("gantt-chart/", status_code=status.HTTP_200_OK)
+@analytics_router.get("/gantt-chart/", status_code=status.HTTP_200_OK)
 async def gantt_chart():
     try:
         return {"download_link": get_gantt_chart()}
     except Exception as e:
         log.error(f"Error while generating the Gantt chart: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal Server Error: {e}",
+        )
+
+
+@analytics_router.get("/gantt-chart-with-resources/", status_code=status.HTTP_200_OK)
+async def gantt_chart_with_resources():
+    try:
+        return {"download_link": get_gantt_with_resource_chart()}
+    except Exception as e:
+        log.error(f"Error while generating the Gantt chart with resources: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal Server Error: {e}",
